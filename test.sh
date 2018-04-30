@@ -8,6 +8,7 @@ ROUTER=$(docker run --rm --detach --link eighteen --link nineteen --publish 8080
 
 finish() {
     if test "$FAIL" = 1; then
+        echo "-- router ------------"
         docker logs "$ROUTER"
         echo "-- eighteen ----------"
         docker logs "$EIGHTEEN"
