@@ -39,4 +39,13 @@ else
     FAIL=1
 fi
 
+########################################
+
+if curl -sSf -H "Host: package.elm-lang.org" "localhost:8080?elm-package-version=0.19" | grep -q 0.19; then
+    echo "PASS: served 0.19 with the flag"
+else
+    echo "FAIL: did not serve 0.19 with the flag"
+    FAIL=1
+fi
+
 exit "$FAIL"
