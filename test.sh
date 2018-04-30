@@ -18,4 +18,15 @@ finish() {
 }
 trap finish EXIT
 
-curl localhost:8080
+FAIL=0
+
+########################################
+
+if curl -sSf -H "Host: package.elm-lang.org" localhost:8080 | grep -q 0.19; then
+    echo "PASS: served 0.19 by default"
+else
+    echo "FAIL: did not serve 0.19 by default"
+    FAIL=1
+fi
+
+exit "$FAIL"
