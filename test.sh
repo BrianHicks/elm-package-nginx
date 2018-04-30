@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -xeuo pipefail
+set -euo pipefail
 
 EIGHTEEN=$(docker run --rm --detach --name eighteen brianhicks/dummy:0.18)
 NINETEEN=$(docker run --rm --detach --name nineteen brianhicks/dummy:0.18)
