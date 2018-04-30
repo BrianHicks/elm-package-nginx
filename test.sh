@@ -7,8 +7,14 @@ NINETEEN=$(docker run --rm --detach --name nineteen brianhicks/dummy:0.19)
 ROUTER=$(docker run --rm --detach --link eighteen --link nineteen --publish 8080:80 --volume "$PWD/nginx.conf":/etc/nginx/nginx.conf:ro nginx nginx-debug -g 'daemon off;')
 
 finish() {
-    docker logs "$ROUTER"
-    docker stop "$EIGHTEEN" "$NINETEEN" "$ROUTER"
+    if test "$FAIL" = 1; then
+        docker logs "$ROUTER"
+        echo "-- eighteen ----------"
+        docker logs "$EIGHTEEN"
+        echo "-- nineteen ----------"
+        docker logs "$NINETEEN"
+    fi
+    docker stop "$EIGHTEEN" "$NINETEEN" "$ROUTER" > /dev/null
 }
 trap finish EXIT
 
