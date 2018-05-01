@@ -16,6 +16,7 @@ finish() {
         docker logs "$NINETEEN"
     fi
     docker stop "$EIGHTEEN" "$NINETEEN" "$ROUTER" > /dev/null
+    if test -f headers; then rm headers; fi
 }
 trap finish EXIT
 
@@ -23,10 +24,12 @@ FAIL=0
 
 ########################################
 
-if curl -sSf -H "Host: package.elm-lang.org" localhost:8080 | grep -q 0.19; then
-    echo "PASS: served 0.19 by default"
+curl -sSf -H "Host: package.elm-lang.org" -D headers localhost:8080 > /dev/null
+if grep -q "Location: https://package.elm-lang.org" headers; then
+    echo "PASS: redirected to HTTPS"
 else
-    echo "FAIL: did not serve 0.19 by default"
+    echo "FAIL: did not redirect to HTTPS"
+    cat headers
     FAIL=1
 fi
 
@@ -41,10 +44,12 @@ fi
 
 ########################################
 
-if curl -sSf -H "Host: package.elm-lang.org" "localhost:8080?elm-package-version=0.19" | grep -q 0.19; then
-    echo "PASS: served 0.19 with the flag"
+curl -sSf -H "Host: package.elm-lang.org" -D headers 'localhost:8080?elm-package-version=0.19' > /dev/null
+if grep -q 'Location: https://package.elm-lang.org?elm-package-version=0.19' headers; then
+    echo "PASS: redirected 0.19 flag to HTTPS"
 else
-    echo "FAIL: did not serve 0.19 with the flag"
+    echo "FAIL: did not redirect 0.19 flag to HTTPS"
+    cat headers
     FAIL=1
 fi
 
