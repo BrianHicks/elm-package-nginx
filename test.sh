@@ -30,6 +30,7 @@ if curl -sSf -A "" -H "Host: package.elm-lang.org" -D headers localhost:8080 | g
     echo "PASS: served 0.18 for no user-agent"
 else
     echo "FAIL: did not serve 0.18 for no user-agent"
+    FAIL=1
 fi
 
 if ! grep -q "Location: https://package.elm-lang.org" headers; then
