@@ -4,11 +4,9 @@ This is an nginx configuration for package.elm-lang.org.
 
 Rules:
 
-1. Requests which arrive with the `elm-package-version=0.18` querystring must be served over HTTP and use the 0.18 package server.
-2. Requests which arrive with the `elm-package-version=0.19` querystring must be served over HTTPS and use the 0.19 package server.
+1. Requests which arrive with no `User-Agent` header must be served over HTTP and use the 0.18 package server (applies to 0.17 and 0.16 as well.)
+2. Requests which arrive with the `User-Agent: elm/0.19.0` header must be served over HTTPS and use the 0.19 package server.
 3. Requests from browsers must be served over HTTPS, and use the latest version of the package server.
-
-The configuration is currently a little hacky, and could use some help to minimze that.
 
 ## Installing:
 

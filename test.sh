@@ -23,11 +23,19 @@ FAIL=0
 
 ########################################
 
-curl -sSf -H "Host: package.elm-lang.org" -D headers localhost:8080 > /dev/null
-if grep -q "Location: https://package.elm-lang.org" headers; then
-    echo "PASS: redirected to HTTPS"
+# Elm 0.18 and prior do not have user agent headers, so they should not be
+# redirected to HTTPS, and they should be served from the 0.18 server code.
+
+if curl -sSf -A "" -H "Host: package.elm-lang.org" -D headers localhost:8080 | grep -q 0.18; then
+    echo "PASS: served 0.18 for no user-agent"
 else
-    echo "FAIL: did not redirect to HTTPS"
+    echo "FAIL: did not serve 0.18 for no user-agent"
+fi
+
+if ! grep -q "Location: https://package.elm-lang.org" headers; then
+    echo "PASS: did not redirect to HTTPS"
+else
+    echo "FAIL: redirected to HTTPS"
     cat headers
     FAIL=1
 fi
@@ -35,32 +43,30 @@ rm headers
 
 ########################################
 
-if curl -sSf -H "Host: package.elm-lang.org" "localhost:8080?elm-package-version=0.18" | grep -q 0.18; then
-    echo "PASS: served 0.18 with the flag"
-else
-    echo "FAIL: did not serve 0.18 with the flag"
-    FAIL=1
-fi
+# Elm 0.19 and later will have the user agent header that includes which version
+# of Elm they are. They should be redirected to HTTPS, and should be served from
+# the 0.19 server code.
 
-########################################
-
-curl -sSf -H "Host: package.elm-lang.org" -D headers 'localhost:8080?elm-package-version=0.19' > /dev/null
-if grep -q 'Location: https://package.elm-lang.org/?elm-package-version=0.19' headers; then
-    echo "PASS: redirected 0.19 flag to HTTPS"
+curl -sSf -A "elm/0.19.0" -H "Host: package.elm-lang.org" -D headers 'localhost:8080/foo?bar=baz' > /dev/null
+if grep -q 'Location: https://package.elm-lang.org/foo?bar=baz' headers; then
+    echo "PASS: redirected 0.19 user-agent to HTTPS"
 else
-    echo "FAIL: did not redirect 0.19 flag to HTTPS"
+    echo "FAIL: did not redirect 0.19 user-agent to HTTPS"
     cat headers
     FAIL=1
 fi
 rm headers
 
-########################################
+#######
 
-curl -sSf -H "Host: package.elm-lang.org" -D headers 'localhost:8080/foo/bar/baz?elm-package-version=0.19' > /dev/null
-if grep -q 'Location: https://package.elm-lang.org/foo/bar/baz?elm-package-version=0.19' headers; then
-    echo "PASS: redirection includes all path components"
+# Browsers and other clients which set some user-agent header should always get
+# the latest version
+
+curl -sSf -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.124 Safari/537.36" -H "Host: package.elm-lang.org" -D headers 'localhost:8080/foo?bar=baz' > /dev/null
+if grep -q 'Location: https://package.elm-lang.org/foo?bar=baz' headers; then
+    echo "PASS: redirected browser user-agent to HTTPS"
 else
-    echo "FAIL: redirection did not include all path components"
+    echo "FAIL: did not redirect browser user-agent to HTTPS"
     cat headers
     FAIL=1
 fi
