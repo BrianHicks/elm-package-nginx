@@ -26,7 +26,7 @@ FAIL=0
 # Elm 0.18 and prior do not have user agent headers, so they should not be
 # redirected to HTTPS, and they should be served from the 0.18 server code.
 
-if curl -sSf -A "" -H "Host: package.elm-lang.org" -D headers localhost:8080 | grep -q 0.18; then
+if curl -sSf -A "" -H "Host: package.elm-lang.org" -D headers 'localhost:8080?elm-package-version=0.18' | grep -q 0.18; then
     echo "PASS: served 0.18 for no user-agent"
 else
     echo "FAIL: did not serve 0.18 for no user-agent"
@@ -48,7 +48,10 @@ rm headers
 # of Elm they are. They should be redirected to HTTPS, and should be served from
 # the 0.19 server code.
 
-curl -sSf -A "elm/0.19.0" -H "Host: package.elm-lang.org" -D headers 'localhost:8080/foo?bar=baz' > /dev/null
+if ! curl -sSf -A "elm/0.19.0" -H "Host: package.elm-lang.org" -D headers 'localhost:8080/foo?bar=baz' > /dev/null; then
+    FAIL=1
+fi
+
 if grep -q 'Location: https://package.elm-lang.org/foo?bar=baz' headers; then
     echo "PASS: redirected 0.19 user-agent to HTTPS"
 else
